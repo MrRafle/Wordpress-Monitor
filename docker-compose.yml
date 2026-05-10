@@ -1,13 +1,12 @@
 version: '3.9'
 
 services:
-  # ==================== ZABBIX CORE ====================
   zabbix-db:
-    image: mariadb:11.4          # ← ЗАМЕНИЛИ mysql:8.4
+    image: mariadb:11.4
     container_name: zabbix-db
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: zabbix_root_pass  # ← MARIADB_ вместо MYSQL_
+      MARIADB_ROOT_PASSWORD: zabbix_root_pass
       MARIADB_DATABASE: zabbix
       MARIADB_USER: zabbix
       MARIADB_PASSWORD: zabbix_pass
@@ -39,7 +38,7 @@ services:
     networks:
       - zabbix-net
     ports:
-      - "10051:10051"   # для внешних агентов, если понадобится
+      - "10051:10051"
 
   zabbix-web:
     image: zabbix/zabbix-web-nginx-mysql:ubuntu-7.4-latest
@@ -61,9 +60,8 @@ services:
     networks:
       - zabbix-net
     ports:
-      - "8080:8080"     # Zabbix UI будет на http://localhost:8080
+      - "8080:8080"
 
-  # ==================== ПРИЛОЖЕНИЯ С АГЕНТАМИ ====================
 
   nginx-custom:
     build: ./nginx-custom
