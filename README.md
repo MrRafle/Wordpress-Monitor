@@ -53,7 +53,7 @@ sudo chmod 644 filebeat/filebeat.yml
 docker compose build
 ```
 
-### 4. Инициализировать БД Zabbix (только при первом запуске)
+### 4. Инициализировать БД Zabbix (при наличии ошибки БД при входе)
 
 ```bash
 # Поднять только БД
@@ -93,6 +93,42 @@ docker compose ps
 | http://localhost:9200 | Elasticsearch JSON |
 | http://localhost:5601 | Kibana |
 
+
+## Создание пользователя, конфигурации и проверка базы данных для mysql-db (Если хотите мониторить базу данных вручную)
+
+```bash
+docker exec -it mysql-wp bash -c '
+mariadb -uroot -pwp_root_pass -e "
+DROP USER IF EXISTS '\''zbx_monitor'\''@'\''localhost'\'';
+CREATE USER '\''zbx_monitor'\''@'\''localhost'\'' IDENTIFIED BY '\''12345678'\'';
+GRANT PROCESS, REPLICATION CLIENT, SHOW DATABASES, SHOW VIEW, SELECT ON *.* 
+TO '\''zbx_monitor'\''@'\''localhost'\'';
+FLUSH PRIVILEGES;"
+
+mkdir -p /var/lib/zabbix /etc/zabbix/zabbix_agent2.d
+
+cat > /var/lib/zabbix/.my.cnf << EOF
+[client]
+user=zbx_monitor
+password=12345678
+EOF
+
+chmod 600 /var/lib/zabbix/.my.cnf
+
+cat > /etc/zabbix/zabbix_agent2.d/mysql.conf << EOF
+MySQL:
+  Sessions:
+    local:
+      User: "zbx_monitor"
+      Password: "12345678"
+      Host: "127.0.0.1"
+EOF
+
+supervisorctl restart zabbix-agent2
+'
+
+docker exec -it mysql-wp mariadb-admin -uzbx_monitor -p12345678 ping
+```
 ---
 
 ## Настройка мониторинга в Zabbix
@@ -105,7 +141,9 @@ docker compose ps
 |---|---|---|---|
 | nginx-custom | nginx-custom | 10050 | Linux by Zabbix agent, Nginx by Zabbix agent |
 | wordpress | wordpress | 10050 | Linux by Zabbix agent, Apache by Zabbix agent |
-| mysql-wp | mysql-wp | 10050 | Linux by Zabbix agent, MySQL by Zabbix agent |
+| mysql-wp | mysql-wp | 10050 | Linux by Zabbix agent |
+
+MySQL by Zabbix agent не позволяет мониторить базу данных в контейнере, так что в его добавлении нет необходимости
 
 > В поле Interfaces выбрать тип **Agent**, переключить **Connect to -> DNS**
 

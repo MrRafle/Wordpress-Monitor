@@ -7,12 +7,15 @@ RUN apt-get update && apt-get install -y \
     && apt-get update && apt-get install -y zabbix-agent2 \
     && rm -rf /var/lib/apt/lists/* zabbix-release*.deb
 
+# Копируем конфиги
 COPY supervisord.conf /etc/supervisord.conf
 COPY zabbix_agent2.conf /etc/zabbix/zabbix_agent2.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 RUN echo "<h1>✅ Nginx + Zabbix Agent2 успешно работает!</h1>" > /usr/share/nginx/html/index.html && \
     mkdir -p /var/log/zabbix /var/run/zabbix && \
-    chown -R root:root /var/log/zabbix /var/run/zabbix
+    chown -R root:root /var/log/zabbix /var/run/zabbix && \
+    chown -R nginx:nginx /var/cache/nginx /var/log/nginx
 
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

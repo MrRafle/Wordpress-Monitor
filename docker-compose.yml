@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   zabbix-db:
     image: mariadb:11.4
@@ -73,6 +71,7 @@ services:
       - "81:80"
     depends_on:
       - zabbix-server
+    hostname: nginx-custom
 
   mysql-wp:
     # image: mariadb:11.4
@@ -88,6 +87,7 @@ services:
       - wp-mysql:/var/lib/mysql
     networks:
       - zabbix-net
+    hostname: mysql-wp
 
   wordpress:
     build: ./wordpress
@@ -104,6 +104,7 @@ services:
       - zabbix-net
     ports:
       - "82:80"
+    hostname: wordpress
 
   elasticsearch:
     image: elasticsearch:8.13.0
