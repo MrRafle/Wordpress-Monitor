@@ -189,14 +189,14 @@ docker compose down -v
 │   └── zabbix_agent2.conf
 ├── nginx-custom
 │   ├── Dockerfile
-│   ├── html
+│   ├── nginx.conf
 │   ├── supervisord.conf
 │   └── zabbix_agent2.conf
 ├── README.md
 └── wordpress
-    ├── Dockerfile
-    ├── supervisord.conf
-    └── zabbix_agent2.conf
+    ├── Dockerfile
+    ├── supervisord.conf
+    └── zabbix_agent2.conf
 ```
 
 ---
